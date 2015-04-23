@@ -1,5 +1,6 @@
 import requests
 import configparser 
+from subprocess import Popen, PIPE
 
 def checkip (ip):
     try:
@@ -26,9 +27,12 @@ if __name__ == '__main__':
     passwd = config['namecheap']['password']
     print('Host: ' + host)
     print('Domain: ' + domain)
-    r = requests.get('http://wtfismyip.com/text')
-    ip = r.text
+    p = Popen([config['namecheap']['getip_command']], shell=True, stdout=PIPE, stderr=PIPE)
+    ip, err = p.communicate()
+    ip = ip.decode("utf-8")
+    err = err.decode("utf-8")
     print('IP: ' + ip)
+    print('Err: ' + err)
     if checkip(ip) == False:
         writeip(ip)
         url = 'https://dynamicdns.park-your-domain.com/update?host=%s&domain=%s&password=%s&ip=%s' % (host, domain, passwd, ip)
